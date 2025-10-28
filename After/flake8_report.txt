@@ -1,2 +1,0 @@
-[1minventory_system.py[m[36m:[m12[36m:[m80[36m:[m [1m[31mE501[m line too long (89 > 79 characters)
-1     E501 line too long (89 > 79 characters)

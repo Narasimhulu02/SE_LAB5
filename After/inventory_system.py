@@ -1,85 +1,83 @@
-"""Inventory Management System with safe and clean design."""
+"""Inventory management system module.
+
+This module provides basic operations for managing stock data:
+- Adding and removing items
+- Loading and saving inventory data from JSON files
+- Checking for low-stock items
+- Printing reports
+"""
 
 import json
 from datetime import datetime
 from typing import Dict, List
 
+# Global variable to store inventory data
+stock_data: Dict[str, int] = {}
 
-# Global dictionary to store stock data
-STOCK_DATA: Dict[str, int] = {}
 
-
-def add_item(
-    item: str = "default",
-    qty: int = 0,
-    logs: List[str] | None = None
-) -> None:
-    """Add a quantity of an item to the inventory."""
+def add_item(item: str = "default", qty: int = 0,
+             logs: List[str] | None = None) -> None:
+    """Add a quantity of an item to the stock."""
+    if logs is None:
+        logs = []
     if not isinstance(item, str) or not isinstance(qty, int):
         return
-
-    STOCK_DATA[item] = STOCK_DATA.get(item, 0) + qty
-    log_entry = f"{datetime.now()}: Added {qty} of {item}"
-    if logs is not None:
-        logs.append(log_entry)
+    stock_data[item] = stock_data.get(item, 0) + qty
+    logs.append(f"{datetime.now()}: Added {qty} of {item}")
 
 
 def remove_item(item: str, qty: int) -> None:
-    """Remove a quantity of an item from the inventory."""
-    if not isinstance(item, str) or not isinstance(qty, int):
-        return
-
+    """Remove a quantity of an item from the stock safely."""
     try:
-        STOCK_DATA[item] -= qty
-        if STOCK_DATA[item] <= 0:
-            del STOCK_DATA[item]
+        stock_data[item] -= qty
+        if stock_data[item] <= 0:
+            del stock_data[item]
     except KeyError:
-        # Item does not exist, ignore safely
+        # Ignore missing items
         pass
 
 
-def get_quantity(item: str) -> int:
-    """Get the current quantity of an item."""
-    return STOCK_DATA.get(item, 0)
+def get_qty(item: str) -> int:
+    """Return the quantity of a given item."""
+    return stock_data.get(item, 0)
 
 
-def load_data(file: str = "inventory.json") -> None:
+def load_data(file_path: str = "inventory.json") -> None:
     """Load inventory data from a JSON file."""
     try:
-        with open(file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            STOCK_DATA.clear()
-            STOCK_DATA.update(data)
+        with open(file_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        stock_data.clear()
+        stock_data.update(data)
     except FileNotFoundError:
-        STOCK_DATA.clear()
-    except json.JSONDecodeError:
-        STOCK_DATA.clear()
+        stock_data.clear()
 
 
-def save_data(file: str = "inventory.json") -> None:
-    """Save the inventory data to a JSON file."""
-    with open(file, "w", encoding="utf-8") as f:
-        json.dump(STOCK_DATA, f, indent=4)
+def save_data(file_path: str = "inventory.json") -> None:
+    """Save inventory data to a JSON file."""
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(stock_data, file, indent=4)
 
 
 def print_data() -> None:
-    """Print a formatted inventory report."""
-    print("\nItems Report")
-    for item, qty in STOCK_DATA.items():
+    """Print the current inventory report."""
+    print("Items Report")
+    for item, qty in stock_data.items():
         print(f"{item} -> {qty}")
 
 
 def check_low_items(threshold: int = 5) -> List[str]:
-    """Return a list of items with stock below the threshold."""
-    return [item for item, qty in STOCK_DATA.items() if qty < threshold]
+    """Return a list of items with quantity below a given threshold."""
+    return [item for item, qty in stock_data.items() if qty < threshold]
 
 
 def main() -> None:
-    """Example flow to demonstrate inventory system usage."""
+    """Main entry point for testing inventory operations."""
     add_item("apple", 10)
     add_item("banana", 2)
     remove_item("apple", 3)
-    print(f"Apple stock: {get_quantity('apple')}")
+    remove_item("orange", 1)
+    print(f"Apple stock: {get_qty('apple')}")
     print(f"Low items: {check_low_items()}")
     save_data()
     load_data()
