@@ -9,8 +9,11 @@ from typing import Dict, List
 STOCK_DATA: Dict[str, int] = {}
 
 
-def add_item(item: str = "default", qty: int = 0,
-             logs: List[str] | None = None) -> None:
+def add_item(
+    item: str = "default",
+    qty: int = 0,
+    logs: List[str] | None = None
+) -> None:
     """Add a quantity of an item to the inventory."""
     if not isinstance(item, str) or not isinstance(qty, int):
         return
